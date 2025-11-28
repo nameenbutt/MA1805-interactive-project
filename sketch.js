@@ -63,7 +63,7 @@ function drawFakeFaceBoxes() {
     //life countdown
     b.life--;
     if (b.life <= 0) glitchBoxes.splice(i, 1);
-}
+ }
 }
 
 function drawScanLines () {
