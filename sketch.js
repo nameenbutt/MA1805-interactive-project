@@ -53,12 +53,8 @@ function drawFakeFaceBoxes() {
     b.life--;
     if (b.life <= 0) glitchBoxes.splice(i, 1);
 }
+}
 
-
-
-
-
-
-
-
+function drawScanLines () {
+  stroke(0, 255, 100, 30);
 }
