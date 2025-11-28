@@ -15,6 +15,10 @@ function draw () {
   drawStaticNoise();
 }
 
+function drawCameraFeed() {
+  //Fake bluury camera background 
+}
+
 
 
 
