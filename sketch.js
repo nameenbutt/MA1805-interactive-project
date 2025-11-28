@@ -49,18 +49,17 @@ function drawFakeFaceBoxes() {
     // label background
 let labelText = b.label;
 textSize(16);
-let tw = textWidth(labelText) + 10; // label width
-
-let labelX = b.x + shakeX;
-let labelY = b.y + shakeY - 24; // above the box
+let tw = textWidth(labelText) + 10; // width of the green box
+let labelX = b.x + shakeX;        // x position of label
+let labelY = b.y + shakeY - 24; // y position of label above the box
 
 noStroke();
 fill(0, 255, 100, 150);
-rect(labelX - tw / 2, labelY - 10, tw, 20); // x, y, w, h
+rect(labelX - 5, labelY - 12, tw, 20); // x, y, w, h
 
 // label text
 fill(0);
-textAlign(CENTER, CENTER);
+textAlign(LEFT, CENTER);
 text(labelText, labelX, labelY);
 
     //life countdown
