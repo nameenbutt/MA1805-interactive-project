@@ -6,6 +6,15 @@ function setup() {
   noCursor(); //hide mouse for cool effect
 }
 
+function draw () {
+  background(0, 20, 30);
+
+  drawCameraFeed();
+  drawFakeFaceBoxes();
+  drawScanLines();
+  drawStaticNoise();
+}
+
 
 
 
