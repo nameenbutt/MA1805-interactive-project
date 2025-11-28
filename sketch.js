@@ -17,6 +17,9 @@ function draw () {
 
 function drawCameraFeed() {
   //Fake bluury camera background 
+  noStroke();
+  fill(40, 60, 80);
+  rect(0, 0, width, height);
 }
 
 
