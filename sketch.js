@@ -49,6 +49,9 @@ function drawFakeFaceBoxes() {
     strokeWeight(random(1, 4));
     noFill();
     rect(b.x + shakeX + b.y + shakeY - 6);
+
+    b.life--;
+    if (b.life <= 0) glitchBoxes.splice(i, 1);
 }
 
 
