@@ -35,21 +35,32 @@ function drawFakeFaceBoxes() {
   }
 
   for (let i = glitchBoxes.length - 1; i >=0; i--) {
-    let b = glitchBoxes(i);
+    let b = glitchBoxes[i];
 
     let shakeX = random(-3, 3);
-    letshakeY = random(-3, 3);
+    let shakeY = random(-3, 3);
 
+    //box
     stroke(0, 255, 100);
     strokeWeight(random(1, 4));
     noFill();
     rect(b.x + shakeX, b.y + shakeY, b.w, b.h);
     
-    fill(0, 255, 100);
-    strokeWeight(random(1, 4));
+    //label background
+    let labelText = b.label;
     textSize(16);
-    rect(b.x + shakeX + b.y + shakeY - 6);
+    let tw = textWidth(labelText) + 10;
 
+    noStroke();
+    fill(0, 255, 100, 150);
+    rect(b.x + shakeX + b.y + shakeY - 24, t, -26);
+
+      // label text
+    fill(0);
+    textAlign(LEFT, CENTER);
+    text(labelText, b.x + shakeX + 5, b.y + shakeY - 14);
+
+    //life countdown
     b.life--;
     if (b.life <= 0) glitchBoxes.splice(i, 1);
 }
