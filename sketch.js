@@ -81,10 +81,35 @@ function draw() {
     strokeWeight(2);
     rect(xMin + shakeX, yMin + shakeY, xMax - xMin, yMax - yMin);
 
-    // dark bar that sometimes covers the eyes (as if
+    // dark bar that sometimes covers the eyes (as if // dark bar that sometimes covers the eyes (as if it “loses” them)
+    if (frameCount % 20 < 10) {
+      noStroke();
+      fill(0, 0, 0, 120);
+      rect(xMin, eyeCY - 6, xMax - xMin, 12);
+    }
 
-
+    // ---- 3. small dots on each eye landmark ----
+    noStroke();
+    fill(255);
+    for (let i = 0; i < allEyeIndices.length; i++) {
+      let p = positions[allEyeIndices[i]];
+      ellipse(p[0], p[1], 4, 4);
+    }
   }
+
+  // ---- 4. simple “broken AI” text ----
+  if (frameCount % 30 === 0) {
+    labelIndex = floor(random(labels.length));
+  }
+  let confidence = nf(random(0, 40).toFixed(2), 2, 2); // 0–40%
+
+  fill(0, 255, 0);
+  noStroke();
+  textSize(12);
+  textAlign(LEFT, TOP);
+  text("FACIAL RECOGNITION", 10, 10);
+  text("Status: " + labels[labelIndex], 10, 26);
+  text("Confidence: " + confidence + " %", 10, 42);
 }
 
 
