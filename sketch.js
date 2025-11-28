@@ -34,7 +34,9 @@ function drawFakeFaceBoxes() {
     });
   }
 
-  
+  for (let i = glitchBoxes.length - 1; i >=0; i--) {
+    let b = glitchBoxes(i);
+
 }
 
 
@@ -44,4 +46,4 @@ function drawFakeFaceBoxes() {
 
 
 
-
+}
