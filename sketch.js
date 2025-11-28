@@ -1,4 +1,10 @@
+function setup() {
+createCanvas(400,400)
+}
 
+function draw() {
+  background(220);
+}
 
 // BROKEN FACIAL RECOGNITION (IMAGE-ONLY VERSION)
 // Only uses p5.js and your image: images/eyes.jpg
