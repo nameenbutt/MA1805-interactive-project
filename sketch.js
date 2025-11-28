@@ -1,101 +1,176 @@
-function setup() {
-createCanvas(400,400)
-}
+// Simple facial-recognition "error" animation
+// Using p5.js in sketch.js
+// Concept: systems misidentify people of colour, especially women,
+// so the "AI" gets more errors when the face is darker.
 
-function draw() {
-  background(220);
-}
+// Position + size of the face
+let faceX, faceY;
+let faceSize = 260;
 
-// BROKEN FACIAL RECOGNITION (IMAGE-ONLY VERSION)
-// Only uses p5.js and your image: images/eyes.jpg
-
-let eyeImg;
-let statusMessages = [
+// Glitch + label variables
+let labels = [
+  "Scanning...",
   "Low confidence",
   "Unknown subject",
-  "Face not detected",
+  "Error: face not found",
   "Re-scanning...",
-  "Error: Cannot classify",
-  "Model bias detected"
+  "Match not in database"
 ];
-let currentStatus = 0;
 
-function preload() {
-  // Load your eyes image from the images folder
-  eyeImg = loadImage("images/eyes.jpg");
-}
+let labelIndex = 0;
+let confidence = 0;
+let glitchAmount = 0;
+
+// Represents biased dataset: 0 = lighter skin, 1 = darker skin
+let biasMode = 0;
 
 function setup() {
-  createCanvas(900, 450);
-  imageMode(CENTER);
-  textFont("monospace");
+  createCanvas(600, 400);
+  faceX = width / 2;
+  faceY = height / 2;
+
+  textAlign(CENTER, CENTER);
+  rectMode(CENTER);
+
+  // Start with some random values
+  confidence = random(60, 99);
+  labelIndex = 0;
 }
 
 function draw() {
-  background(0);
+  background(5);
 
-  // slight shifting movement (fake “AI searching”)
-  let moveX = sin(frameCount * 0.02) * 8;
-  let moveY = cos(frameCount * 0.015) * 4;
+  // Slight scan-line effect
+  drawScanLines();
 
-  // draw your eyes image
-  image(eyeImg, width/2 + moveX, height/2 + moveY, 700, 350);
+  // Draw "camera frame" / UI
+  drawFrameUI();
 
-  // ----- HORIZONTAL GLITCH SLICES -----
-  for (let i = 0; i < 25; i++) {
-    let sliceY = random(height/2 - 120, height/2 + 120);
-    let sliceH = random(4, 18);
-    let offset = random(-60, 60);
-
-    copy(
-      eyeImg,
-      0, sliceY - (height/2 - 175),
-      eyeImg.width, sliceH,
-      width/2 - 350 + offset,
-      sliceY,
-      700, sliceH
-    );
+  // Decide how broken the system is, based on biasMode
+  // If biasMode === 0 -> lighter skin -> higher confidence, fewer glitches
+  // If biasMode === 1 -> darker skin -> lower confidence, more errors
+  if (biasMode === 0) {
+    confidence = lerp(confidence, random(85, 99), 0.02);
+    glitchAmount = lerp(glitchAmount, 2, 0.05);
+  } else {
+    confidence = lerp(confidence, random(15, 60), 0.02);
+    glitchAmount = lerp(glitchAmount, 15, 0.05);
   }
 
-  // ----- MISALIGNED DETECTION BOX -----
-  noFill();
-  stroke(0, 255, 0);
-  strokeWeight(2);
-
-  rect(
-    width/2 - 180 + random(-5,5),
-    height/2 - 80 + random(-5,5),
-    360,
-    160
-  );
-
-  // ----- RANDOM PIXEL NOISE -----
-  for (let i = 0; i < 30; i++) {
-    fill(random(255), random(255), random(255), random(40,100));
-    noStroke();
-    rect(random(width), random(height), random(4,20), random(4,20));
+  // Randomly change labels over time (like unstable predictions)
+  if (frameCount % 45 === 0) {
+    if (biasMode === 0) {
+      // mostly confident / ok labels
+      labelIndex = random() < 0.7 ? 0 : floor(random(labels.length));
+    } else {
+      // mostly error / low confidence labels
+      labelIndex = floor(random(labels.length));
+    }
   }
 
-  // ----- ERROR MESSAGES / LOW CONFIDENCE -----
-  if (frameCount % 25 === 0) {
-    currentStatus = int(random(statusMessages.length));
-  }
+  // Draw the face with some jitter / glitch
+  push();
+  translate(faceX, faceY);
 
-  fill(0,255,0);
-  noStroke();
-  textSize(14);
-  textAlign(LEFT, TOP);
-  text("FACIAL RECOGNITION v1.0", 20, 20);
-  text("Status: " + statusMessages[currentStatus], 20, 45);
+  // Small random offset for glitch feel (stronger when biased)
+  let jitterX = random(-glitchAmount, glitchAmount);
+  let jitterY = random(-glitchAmount, glitchAmount);
+  translate(jitterX, jitterY);
 
-  let confidence = nf(random(0, 35).toFixed(2), 2, 2);
-  text("Confidence: " + confidence + "%", 20, 70);
+  drawFace();
+  pop();
 
-  // bottom warning
-  fill(255, 0, 0);
-  textAlign(CENTER, CENTER);
-  text("⚠ Failed to identify subject", width/2, height - 25);
+  // Draw extra glitch rectangles (more when biased)
+  drawGlitches();
+
+  // Draw the changing "AI" text + confidence
+  drawOverlayText();
 }
+
+function drawFace() {
+  noStroke();
+
+  // Choose skin tone based on biasMode
+  let skinTone;
+  if (biasMode === 0) {
+    // lighter
+    skinTone = color(245, 210, 180);
+  } else {
+    // darker
+    skinTone = color(120, 80, 50);
+  }
+
+  // Head
+  fill(skinTone);
+  ellipse(0, 0, faceSize, faceSize * 1.2);
+
+  // Neck
+  rect(0, faceSize * 0.55, faceSize * 0.3, faceSize * 0.4, 20);
+
+  // Shoulders
+  fill(40);
+  rect(0, faceSize * 0.95, faceSize * 0.9, faceSize * 0.35, 50);
+
+  // Eyes
+  let eyeOffsetX = faceSize * 0.22;
+  let eyeY = -faceSize * 0.1;
+  let eyeW = faceSize * 0.22;
+  let eyeH = faceSize * 0.13;
+
+  // Eye whites
+  fill(240);
+  ellipse(-eyeOffsetX, eyeY, eyeW, eyeH);
+  ellipse(+eyeOffsetX, eyeY, eyeW, eyeH);
+
+  // Pupils (slight misalignment when biased to show "tracking" issues)
+  let pupilOffset = biasMode === 0 ? 0 : random(-4, 4);
+  fill(20);
+  ellipse(-eyeOffsetX + pupilOffset, eyeY, eyeW * 0.25, eyeH * 0.5);
+  ellipse(+eyeOffsetX + pupilOffset, eyeY, eyeW * 0.25, eyeH * 0.5);
+
+  // Brows
+  stroke(20);
+  strokeWeight(4);
+  let browY = eyeY - eyeH * 0.8;
+  line(-eyeOffsetX - eyeW * 0.3, browY, -eyeOffsetX + eyeW * 0.3, browY);
+  line(+eyeOffsetX - eyeW * 0.3, browY - 2, +eyeOffsetX + eyeW * 0.3, browY - 2);
+
+  // Nose
+  noFill();
+  stroke(30);
+  strokeWeight(3);
+  beginShape();
+  vertex(0, eyeY);
+  vertex(0, eyeY + eyeH * 1.1);
+  vertex(-eyeW * 0.1, eyeY + eyeH * 1.4);
+  endShape();
+
+  // Mouth (more unstable when biased)
+  let mouthY = faceSize * 0.22;
+  let mouthWidth = faceSize * 0.35;
+  let mouthOpen = biasMode === 1 ? random(3, 12) : 4;
+
+  noFill();
+  stroke(180, 50, 80);
+  strokeWeight(4);
+  bezier(
+    -mouthWidth, mouthY,
+    -mouthWidth * 0.3, mouthY + mouthOpen,
+    mouthWidth * 0.3, mouthY + mouthOpen,
+    mouthWidth, mouthY
+  );
+}
+
+function drawFrameUI() {
+  noFill();
+  stroke(80);
+  strokeWeight(2);
+  rect(width / 2, height / 2, width * 0.85, height * 0.75, 10);
+
+  // Corner brackets like a scanner
+  let marginX = width * 0.1;
+  let marginY = height * 0.12;
+
 
 
 
