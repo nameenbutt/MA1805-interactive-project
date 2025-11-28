@@ -1,109 +1,92 @@
-// SIMPLE EYE-FOCUSED FACIAL RECOGNITION (GLITCHY)
-// Needs p5.js + clmtrackr + pModel already included in your HTML
+// SIMPLE BROKEN FACIAL RECOGNITION (BEGINNER VERSION)
+// Only p5.js is used — no tracking, no extra libraries
 
-let capture;
-let ctracker;
+let eyeImg;
+let statusMessages = [
+  "Low confidence",
+  "Unknown subject",
+  "Face not detected",
+  "Re-scanning...",
+  "Error: Cannot classify",
+  "Data insufficient"
+];
+let currentStatus = 0;
 
-// clmtrackr eye landmark indices
-let leftEyePoints  = [23, 63, 24, 64, 25, 65, 26, 66];
-let rightEyePoints = [30, 67, 31, 68, 28, 69, 29, 70];
-
-let labels = ["Low confidence", "Unknown subject", "Error", "Re-scanning..."];
-let labelIndex = 0;
+function preload() {
+  // Load YOUR image from the images folder
+  eyeImg = loadImage("images/eyes.jpg");
+}
 
 function setup() {
-  createCanvas(640, 480);
-
-  // webcam
-  capture = createCapture(VIDEO);
-  capture.size(640, 480);
-  capture.hide();
-
-  // face tracker
-  ctracker = new clm.tracker();
-  ctracker.init(pModel);
-  ctracker.start(capture.elt);
-
+  createCanvas(800, 400);
+  imageMode(CENTER);
   textFont("monospace");
 }
 
 function draw() {
   background(0);
 
-  // draw webcam
-  image(capture, 0, 0, width, height);
-  filter(INVERT);
+  // Slight movement (like “AI trying to detect”)
+  let shakeX = sin(frameCount * 0.03) * 10;
+  let shakeY = cos(frameCount * 0.02) * 5;
 
-  // tracked points
-  let positions = ctracker.getCurrentPosition();
+  // Draw your eyes image
+  image(eyeImg, width/2 + shakeX, height/2 + shakeY, 600, 300);
 
-  if (positions.length > 0) {
+  // --- GLITCH SLICES ---
+  for (let i = 0; i < 20; i++) {
+    let sliceY = random(height/2 - 120, height/2 + 120);
+    let sliceH = random(5, 20);
+    let offset = random(-40, 40);
 
-    // ---- 1. COLLECT EYE POINTS ----
-    let allEyeIndices = leftEyePoints.concat(rightEyePoints);
+    copy(
+      eyeImg,
+      0, sliceY - (height/2 - 150),
+      eyeImg.width, sliceH,
+      width/2 - 300 + offset,
+      sliceY,
+      600, sliceH
+    );
+  }
 
-    let first = positions[allEyeIndices[0]];
-    let xMin = first[0];
-    let xMax = first[0];
-    let yMin = first[1];
-    let yMax = first[1];
+  // --- MISALIGNED “DETECTION BOX” ---
+  noFill();
+  stroke(0, 255, 0);
+  strokeWeight(2);
+  rect(
+    width/2 - 150 + random(-4, 4),
+    height/2 - 60 + random(-4, 4),
+    300,
+    120
+  );
 
-    // find bounding box
-    for (let i = 1; i < allEyeIndices.length; i++) {
-      let p = positions[allEyeIndices[i]];
-
-      if (p[0] < xMin) xMin = p[0];
-      if (p[0] > xMax) xMax = p[0];
-      if (p[1] < yMin) yMin = p[1];
-      if (p[1] > yMax) yMax = p[1];
-    }
-
-    // padding
-    let padding = 8;
-    xMin -= padding;
-    xMax += padding;
-    yMin -= padding;
-    yMax += padding;
-
-    // ---- 2. SHAKY EYE BOX ----
-    let shakeX = random(-3, 3);
-    let shakeY = random(-3, 3);
-
-    noFill();
-    stroke(0, 255, 0);
-    strokeWeight(2);
-    rect(xMin + shakeX, yMin + shakeY, xMax - xMin, yMax - yMin);
-
-    // ---- 3. DARK BAR GLITCH ----
-    if (frameCount % 20 < 10) {
-      noStroke();
-      fill(0, 0, 0, 120);
-      rect(xMin, (yMin+yMax)/2 - 6, xMax - xMin, 12);
-    }
-
-    // ---- 4. EYE DOTS ----
-    fill(255);
+  // --- RANDOM PIXEL NOISE ---
+  for (let i = 0; i < 20; i++) {
+    fill(random(255), random(255), random(255), random(40, 120));
     noStroke();
-    for (let i = 0; i < allEyeIndices.length; i++) {
-      let p = positions[allEyeIndices[i]];
-      ellipse(p[0], p[1], 4, 4);
-    }
+    rect(random(width), random(height), random(5, 20), random(5, 20));
   }
 
-  // ---- 5. SIMPLE BROKEN AI TEXT ----
+  // --- FAILING AI TEXT OVERLAY ---
   if (frameCount % 30 === 0) {
-    labelIndex = floor(random(labels.length));
+    currentStatus = int(random(statusMessages.length));
   }
-
-  let confidence = nf(random(0, 40).toFixed(2), 2, 2);
 
   fill(0, 255, 0);
+  textSize(14);
   noStroke();
-  textSize(12);
-  text("FACIAL RECOGNITION", 10, 10);
-  text("Status: " + labels[labelIndex], 10, 26);
-  text("Confidence: " + confidence + "%", 10, 42);
+  textAlign(LEFT, TOP);
+
+  text("FACIAL RECOGNITION v1.0", 20, 20);
+  text("Status: " + statusMessages[currentStatus], 20, 45);
+  text("Confidence: " + nf(random(0, 40).toFixed(2), 2, 2) + "%", 20, 70);
+
+  // bottom warning
+  fill(255, 0, 0);
+  textAlign(CENTER, CENTER);
+  text("⚠ Unable to identify subject", width/2, height - 20);
 }
+
 
 
 
