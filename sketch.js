@@ -47,6 +47,7 @@ function drawFakeFaceBoxes() {
     
     fill(0, 255, 100);
     strokeWeight(random(1, 4));
+    noFill();
 }
 
 
