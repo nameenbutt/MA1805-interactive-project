@@ -47,7 +47,7 @@ function drawFakeFaceBoxes() {
     
     fill(0, 255, 100);
     strokeWeight(random(1, 4));
-    noFill();
+    textSize(16);
     rect(b.x + shakeX + b.y + shakeY - 6);
 
     b.life--;
@@ -61,3 +61,11 @@ function drawScanLines () {
     line(0, y + (frameCount % 15), width, y + (frameCount % 15));
   }
 }
+
+  function drawStaticNoise () {
+    for (let i = 0; i < 300; i ++) {
+      stroke(random([0, 255]));
+      point(random(width), random(height));
+    }
+  }
+
