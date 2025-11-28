@@ -43,6 +43,7 @@ function drawFakeFaceBoxes() {
     stroke(0, 255, 100);
     strokeWeight(random(1, 4));
     noFill();
+    rect(b.x + shakeX, b.y + shakeY, b.w, b.h);
 
 }
 
