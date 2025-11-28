@@ -40,6 +40,8 @@ function drawFakeFaceBoxes() {
     let shakeX = random(-3, 3);
     letshakeY = random(-3, 3);
 
+    stroke(0, 255, 100);
+
 }
 
 
