@@ -71,7 +71,7 @@ text(labelText, labelX, labelY);
 function drawScanLines () {
   stroke(0, 255, 100, 30);
   for (let y = 0; y < height; y +=15) {
-    line(0, y + (frameCount % 14), width, y + (frameCount % 15));
+    line(0, y + (frameCount % 15), width, y + (frameCount % 15));
   }
 }
 
