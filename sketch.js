@@ -41,6 +41,7 @@ function drawFakeFaceBoxes() {
     letshakeY = random(-3, 3);
 
     stroke(0, 255, 100);
+    strokeWeight(random(1, 4));
 
 }
 
