@@ -46,19 +46,22 @@ function drawFakeFaceBoxes() {
     noFill();
     rect(b.x + shakeX, b.y + shakeY, b.w, b.h);
     
-    //label background
-    let labelText = b.label;
-    textSize(16);
-    let tw = textWidth(labelText) + 10;
+    // label background
+let labelText = b.label;
+textSize(16);
+let tw = textWidth(labelText) + 10; // label width
 
-    noStroke();
-    fill(0, 255, 100, 150);
-    rect(b.x + shakeX + b.y + shakeY - 24, t, -26);
+let labelX = b.x + shakeX;
+let labelY = b.y + shakeY - 24; // above the box
 
-      // label text
-    fill(0);
-    textAlign(LEFT, CENTER);
-    text(labelText, b.x + shakeX + 5, b.y + shakeY - 14);
+noStroke();
+fill(0, 255, 100, 150);
+rect(labelX - tw / 2, labelY - 10, tw, 20); // x, y, w, h
+
+// label text
+fill(0);
+textAlign(CENTER, CENTER);
+text(labelText, labelX, labelY);
 
     //life countdown
     b.life--;
