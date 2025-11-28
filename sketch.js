@@ -37,6 +37,9 @@ function drawFakeFaceBoxes() {
   for (let i = glitchBoxes.length - 1; i >=0; i--) {
     let b = glitchBoxes(i);
 
+    let shakeX = random(-3, 3);
+    letshakeY = random(-3, 3);
+
 }
 
 
