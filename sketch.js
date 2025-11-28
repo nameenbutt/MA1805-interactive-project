@@ -1,89 +1,91 @@
-let eyeImg;
-let labels = ["Low Confidence", "Unknown Subject", "Error", "Recalibrating..."];
-let labelIndex = 0;
-let trackingPoints = [];
-let glitchSlices = [];
+// SIMPLE EYE-FOCUSED FACIAL RECOGNITION (GLITCHY)
+// Needs p5.js + clmtrackr + pModel already included in your HTML
 
-function preload() {
-  eyeImg = loadImage('images/eyes.jpg', 
-    () => console.log('Image loaded!'), 
-    () => console.error('Image failed to load')
-  );
-}
+let capture;
+let ctracker;
+
+// eye landmark indices from clmtrackr
+// (same numbering you saw on your screenshot)
+let leftEyePoints  = [23, 63, 24, 64, 25, 65, 26, 66];
+let rightEyePoints = [30, 67, 31, 68, 28, 69, 29, 70];
+
+let labels = ["Low confidence", "Unknown subject", "Error", "Re-scanning..."];
+let labelIndex = 0;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  imageMode(CENTER);
-  textAlign(CENTER, CENTER);
-  textSize(20);
+  createCanvas(640, 480);
 
-  // Initialize pseudo eye tracking points
-  // We'll simulate 8 points over the eyes
-  for (let i = 0; i < 8; i++) {
-    trackingPoints.push({x: width/2 + random(-50,50), y: height/2 + random(-10,10)});
-  }
+  // webcam
+  capture = createCapture(VIDEO);
+  capture.size(640, 480);
+  capture.hide();
 
-  // Initialize glitch slices
-  for (let i = 0; i < 30; i++) {
-    glitchSlices.push({
-      y: random(height/2 - 100, height/2 + 100),
-      h: random(5, 25),
-      offset: random(-40, 40)
-    });
-  }
+  // face tracker
+  ctracker = new clm.tracker();
+  ctracker.init(pModel);
+  ctracker.start(capture.elt);
+
+  textFont("monospace");
 }
 
 function draw() {
   background(0);
 
-  if (eyeImg) {
-    let faceX = width/2 + sin(frameCount * 0.02) * 40;
-    let faceY = height/2 + cos(frameCount * 0.015) * 15;
+  // draw webcam
+  image(capture, 0, 0, width, height);
+  // invert colours (like your screenshot)
+  filter(INVERT);
 
-    // Draw the main eyes image
-    image(eyeImg, faceX, faceY, eyeImg.width, eyeImg.height);
+  let positions = ctracker.getCurrentPosition();
 
-    // --- Apply glitch slices ---
-    for (let i = 0; i < glitchSlices.length; i++) {
-      let s = glitchSlices[i];
-      copy(
-        eyeImg,
-        0, s.y - height/2 + eyeImg.height/2, eyeImg.width, s.h,
-        faceX - eyeImg.width/2 + s.offset, s.y - s.h/2, eyeImg.width, s.h
-      );
+  if (positions.length > 0) {
+    // ---- 1. find eye bounding box ----
+    let allEyeIndices = leftEyePoints.concat(rightEyePoints);
+
+    // start with first eye point
+    let first = positions[allEyeIndices[0]];
+    let xMin = first[0];
+    let xMax = first[0];
+    let yMin = first[1];
+    let yMax = first[1];
+
+    // go through all eye points
+    for (let i = 1; i < allEyeIndices.length; i++) {
+      let p = positions[allEyeIndices[i]];
+      let x = p[0];
+      let y = p[1];
+
+      if (x < xMin) xMin = x;
+      if (x > xMax) xMax = x;
+      if (y < yMin) yMin = y;
+      if (y > yMax) yMax = y;
     }
 
-    // --- Simulated eye movement / tracking points ---
-    for (let i = 0; i < trackingPoints.length; i++) {
-      let p = trackingPoints[i];
-      // Small jitter to simulate AI trying to track but failing
-      let jitterX = sin(frameCount * 0.1 + i) * random(-3,3);
-      let jitterY = cos(frameCount * 0.1 + i) * random(-3,3);
-      ellipse(faceX + (p.x - width/2) + jitterX, faceY + (p.y - height/2) + jitterY, 8, 8);
-    }
+    // add a bit of padding around the eyes
+    let padding = 8;
+    xMin -= padding;
+    xMax += padding;
+    yMin -= padding;
+    yMax += padding;
 
-    // --- Random pixel flicker overlays for glitch ---
-    for (let i = 0; i < 10; i++) {
-      fill(random(255), random(255), random(255), random(50, 120));
-      rect(random(width), random(height), random(5, 30), random(5, 30));
-    }
+    // centre of eyes
+    let eyeCX = (xMin + xMax) / 2;
+    let eyeCY = (yMin + yMax) / 2;
 
-    // --- Red confidence / error labels ---
-    let confidence = nf(random(0, 40).toFixed(2), 2, 2);
-    fill(255, 0, 0);
-    noStroke();
-    textSize(18);
-    text("Confidence: " + confidence + "%", width/2, height/2 + 200);
+    // ---- 2. draw shaky eye box ----
+    let shakeX = random(-3, 3);
+    let shakeY = random(-3, 3);
 
-    if (frameCount % 20 === 0) {
-      labelIndex = floor(random(labels.length));
-    }
-    textSize(22);
-    text("Status: " + labels[labelIndex], width/2, height/2 + 240);
+    noFill();
+    stroke(0, 255, 0);
+    strokeWeight(2);
+    rect(xMin + shakeX, yMin + shakeY, xMax - xMin, yMax - yMin);
+
+    // dark bar that sometimes covers the eyes (as if
+
+
   }
 }
-
-
 
 
 
